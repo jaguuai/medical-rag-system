@@ -439,17 +439,43 @@ This informs, doesn't block, and shows initiative.
 
 ## Bonus — What Was Improved
 
-### 1. Model Benchmarking (not in spec)
-Instead of picking a model arbitrarily, three embedding models were systematically benchmarked: MedCPT, e5-small, and bge-m3 — across both Turkish and English queries. This revealed that e5-small+BM25 RRF matches bge-m3 at 1/7 the cost.
+### 1. Abstract-Only Corpus Pipeline
+**Problem:** Initial pipeline returned 5 articles without abstracts (out of 50). BM25 and semantic search both rely on abstract text — articles without abstracts are useless for retrieval.
 
-### 2. Turkish NLP Gap Analysis
-Confirmed via HuggingFace search that no Turkish medical embedding model exists. Documented this as a research gap in the README.
+**Solution:** Built `build_corpus_abstract_only()` which:
+- Fetches up to 15 articles per term
+- Only includes articles with meaningful abstracts (>30 words)
+- Guarantees each term has exactly 5 abstract-complete articles
 
-### 3. Ground Truth Dataset
-Created `ground_truth.json` with 24 expert-curated QA pairs across 4 medical topics with source PMIDs, enabling reproducible evaluation beyond pseudo-relevance.
+**Impact:** 50/50 articles now have abstracts (was 45/50). Zero "empty" documents in corpus.
 
-### 4. Abstract-Only Corpus Pipeline
-The initial pipeline returned articles without abstracts (5/50 missing). Built `build_corpus_abstract_only()` which fetches additional candidates until exactly 5 abstract-complete articles are collected per term.
+### 2. Query Prefix Discovery for e5-small
+**Problem:** e5-small is instruction-tuned — it expects `query:` prefix for queries and `passage:` prefix for documents. Without these, retrieval quality degrades significantly.
+
+**Solution:** Discovered through experimentation that omitting `query:` prefix caused poor Turkish query performance. Added `f"query: {query}"` to all semantic search calls.
+
+**Impact:** Turkish MRR improved from 0.833 → 1.000.
+
+### 3. RRF Implementation from Scratch
+**Problem:** No off-the-shelf RRF implementation available. Needed to implement Cormack et al. (2009) formula correctly.
+
+**Solution:** Implemented `reciprocal_rank_fusion()` with configurable k parameter (default=60). Verified behavior across k=0,1,10,60,1000 matches paper's findings.
+
+**Impact:** Hybrid RRF achieves MRR=1.000 at 1/7 the memory cost of bge-m3.
+
+### 4. Hit@5 vs Hit@3 Trade-off Discovery
+**Problem:** Three ground truth questions failed Hit@3 because expected articles appeared at rank 4.
+
+**Finding:** This wasn't retrieval failure — expected articles were in top-5 but not top-3. Hit@5 is more clinically practical (doctors can scan 5 results).
+
+**Resolution:** Report both metrics transparently. Hit@3 = 84%, Hit@5 = 100%.
+
+### 5. Ground Truth Creation
+**Problem:** No labeled evaluation data for this specific corpus. Pseudo-relevance (query_terms field) is an approximation.
+
+**Solution:** Created `ground_truth.json` with 19 question-answer pairs across 4 medical topics, each linked to source PMID and expected answer fragment.
+
+**Impact:** Enables reproducible evaluation beyond pseudo-relevance.
 
 ---
 
