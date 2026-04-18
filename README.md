@@ -403,37 +403,43 @@ A secondary discovery: `"otitis media"` is Latin-origin medical terminology that
 
 **Step 1 — Understand what's being measured**
 
-Before choosing a path, I clarify what the benchmark needs to measure:
-
-| Metric | API (Groq) | Spot GPU | Quantized |
-|--------|------------|----------|-----------|
-| Accuracy / MRR | ✅ Valid | ✅ Valid | ⚠️ Slightly degraded |
+| Metric | API (Groq Free) | Spot GPU | On-Demand GPU |
+|--------|-----------------|----------|---------------|
+| Accuracy / MRR | ✅ Valid | ✅ Valid | ✅ Valid |
 | Latency (p50/p99) | ❌ Not valid | ✅ Valid | ✅ Valid |
-| Throughput (tokens/sec) | ❌ Not valid | ✅ Valid | ⚠️ Lower |
+| Throughput | ❌ Not valid | ✅ Valid | ✅ Valid |
 
 **Step 2 — Prioritize based on deadline**
 
-The benchmark is needed "by end of week" (Friday). Today is Monday. I have 4 days.
+Benchmark needed by Friday. Today is Monday. 4 days.
 
-**Step 3 — Execute in parallel, not sequentially**
+**Step 3 — Execute in parallel with zero-cost options first**
 
-| Day | Action |
-|-----|--------|
-| **Monday (today)** | Start Groq API benchmark (2–3 hours). Simultaneously request spot H100 instances on RunPod/Lambda Labs (~$2.50/hr, 60–70% cheaper than on-demand). |
-| **Tuesday** | If spot instance is available, run the same benchmark there for latency and throughput numbers. Preemption risk is acceptable for a short benchmark with checkpoint support. |
-| **Wednesday** | Compare results. If accuracy matches across both environments (expected), document API latency as "baseline reference" and spot latency as "self-hosted estimate." |
-| **Thursday** | Prepare report. |
-| **Friday** | Deliver results. |
+| Day | Action | Cost |
+|-----|--------|------|
+| **Monday** | Start Groq **Free Tier** benchmark for accuracy (Llama 3.3 70B, 1,000 req/day [citation:10]) | **$0** |
+| **Monday** | Simultaneously request spot H100 instances on RunPod/Lambda (~$2.50/hr) | ~$0 until approved |
+| **Tuesday** | If spot available, run latency benchmark there | $10-20 |
+| **Wednesday** | Compare results. Accuracy should match across environments. | — |
+| **Thursday** | Prepare report | — |
+| **Friday** | Deliver | — |
 
-**Fallback:** If no spot GPU is available by Tuesday, run AWQ/GPTQ 4-bit quantized 
-Llama-3-70B on an **available A100 or A10G** (both have 24GB+ VRAM). Accuracy 
-degradation is typically 1–2% on medical QA tasks — clearly documented.
+**Fallback options (zero-cost):**
+
+| Provider | Model | Free Limit | Best for |
+|----------|-------|------------|----------|
+| **Groq** | Llama 3.3 70B | 1,000 req/day [citation:10] | Fastest free inference [citation:4] |
+| **Together AI** | 50+ models | $5 free credit [citation:5] | Model variety |
+| **Google AI Studio** | Gemini 2.0 Flash | 1,500 req/day [citation:5] | Fallback if rate-limited |
+| **Cerebras** | Llama 3.1 70B | 30 req/min [citation:5] | Ultra-fast alternative |
+
+**If spot GPU unavailable:** Use Groq Free Tier for **complete accuracy benchmark at $0 cost**. Latency numbers won't be self-hosted, but quality metrics will be fully valid and free.
 
 **Step 4 — Communicate**
 
-> *"No L40S today. Running benchmark on Groq API for accuracy numbers (ready today). Also requesting spot H100 instances for latency validation (likely tomorrow). Will deliver full report by Friday. Let me know if you want me to prioritize something else."*
+> *"No L40S today. Running accuracy benchmark on Groq Free Tier (1000 req/day, $0). Requesting spot H100 for latency — if unavailable, we still get full accuracy results for free. Full report by Friday."*
 
-This informs without blocking, and demonstrates initiative. Note: any latency numbers from API runs will be flagged as non-representative of self-hosted inference in the final report.
+**Note:** Groq Free Tier provides 1,000 requests per day for Llama 3.3 70B [citation:10] — sufficient for a 500-query medical QA benchmark. API latency is not representative of self-hosted inference, but accuracy metrics are fully valid.
 
 ---
 
