@@ -19,7 +19,7 @@ Open `doctorfollow_case.ipynb` in Google Colab or Jupyter and run cells sequenti
 ```bash
 export GEMINI_API_KEY="your_key_here"
 ```
-Or in Colab, use the Secrets panel (🔑) and add `GEMINI_API_KEY`.
+Or in Colab, use the Secrets panel and add `GEMINI_API_KEY`.
 
 **Requirements:**
 ```
