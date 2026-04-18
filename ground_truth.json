@@ -1,0 +1,137 @@
+{
+  "ground_truth": {
+    "atrial_fibrillation": [
+      {
+        "question": "What is atrial fibrillation?",
+        "expected_answer": "clinical overview of atrial fibrillation, focusing on diagnosis, treatment, and practice improvement",
+        "source_pmid": "28265666",
+        "source_title": "Atrial Fibrillation."
+      },
+      {
+        "question": "How is atrial fibrillation managed?",
+        "expected_answer": "stroke prevention through systemic anticoagulation will be a cornerstone of atrial fibrillation management",
+        "source_pmid": "16326228",
+        "source_title": "Atrial fibrillation."
+      },
+      {
+        "question": "What causes atrial fibrillation in young patients?",
+        "expected_answer": "AF in the young is unique, with a distinct set of pathophysiologic factors that influence disease onset, response to treatment, and prognosis",
+        "source_pmid": "40436475",
+        "source_title": "Atrial Fibrillation in the Young: Pathogenesis and Clinical Implications."
+      },
+      {
+        "question": "What is the neurogenic theory of atrial fibrillation?",
+        "expected_answer": "autonomic imbalance is not a simple modulation factor; both the trigger and the substrate of atrial fibrillation can be influenced by abnormal cardiac innervation",
+        "source_pmid": "29229215",
+        "source_title": "Atrial fibrillation: Neurogenic or myogenic?"
+      },
+      {
+        "question": "Is catheter ablation effective for AF in heart failure?",
+        "expected_answer": "catheter ablation in patients with atrial fibrillation and concomitant heart failure is effective",
+        "source_pmid": "30561633",
+        "source_title": "Atrial fibrillation ablation in heart failure."
+      }
+    ],
+    "type_2_diabetes_mellitus": [
+      {
+        "question": "What is type 2 diabetes mellitus associated with?",
+        "expected_answer": "strongly associated with lower performance on multiple domains of cognitive function and with structural abnormalities of the brain",
+        "source_pmid": "34251351",
+        "source_title": "Type 2 Diabetes Mellitus and Cognitive Impairment."
+      },
+      {
+        "question": "What pharmacological approaches prevent type 2 diabetes?",
+        "expected_answer": "certain drugs prevent or slow development of hyperglycemia; drugs used for obesity management were shown to prevent T2DM",
+        "source_pmid": "36967777",
+        "source_title": "Pharmacological approaches to the prevention of type 2 diabetes mellitus."
+      },
+      {
+        "question": "What is the role of gut microbiota in type 2 diabetes?",
+        "expected_answer": "gut microbiota plays an important role in the development of metabolic diseases, especially T2DM",
+        "source_pmid": "35242721",
+        "source_title": "Gut Microbiota: An Important Player in Type 2 Diabetes Mellitus."
+      },
+      {
+        "question": "What are the pathophysiological mechanisms of type 2 diabetes?",
+        "expected_answer": "mitochondrial dysfunction, obesity, gut microbiota, oxidative stress and inflammation",
+        "source_pmid": "40416523",
+        "source_title": "Associated factors and principal pathophysiological mechanisms of type 2 diabetes mellitus."
+      }
+    ],
+    "acute_otitis_media": [
+      {
+        "question": "What percentage of children get acute otitis media?",
+        "expected_answer": "affects over 80% of children before their third birthday",
+        "source_pmid": "28707578",
+        "source_title": "Acute Otitis Media in Children."
+      },
+      {
+        "question": "What is the first-line antibiotic for acute otitis media?",
+        "expected_answer": "Amoxicillin is the drug of choice",
+        "source_pmid": "28707578",
+        "source_title": "Acute Otitis Media in Children."
+      },
+      {
+        "question": "When can antibiotic therapy be deferred in AOM?",
+        "expected_answer": "in children two years or older with mild symptoms",
+        "source_pmid": "24134083",
+        "source_title": "Otitis media: diagnosis and treatment."
+      },
+      {
+        "question": "What are the common bacterial causes of AOM?",
+        "expected_answer": "Streptococcus pneumoniae, Haemophilus influenzae, and Moraxella catarrhalis",
+        "source_pmid": "24439877",
+        "source_title": "Acute otitis media."
+      },
+      {
+        "question": "What is the difference between AOM and OME?",
+        "expected_answer": "the fluid is not infected in OME as is seen in AOM patients",
+        "source_pmid": "24439877",
+        "source_title": "Acute otitis media."
+      }
+    ],
+    "celiac_disease_diagnosis": [
+      {
+        "question": "What is the gold standard for celiac disease diagnosis?",
+        "expected_answer": "duodenal biopsy is the gold standard",
+        "source_pmid": "26784474",
+        "source_title": "Contemporary celiac disease diagnosis: is a biopsy avoidable?"
+      },
+      {
+        "question": "What serological test is used for celiac disease?",
+        "expected_answer": "IgA anti-transglutaminase (TG2) antibodies combined with IgA quantification to rule out IgA deficiency",
+        "source_pmid": "33878915",
+        "source_title": "Celiac disease: Understandings in diagnostic, nutritional, and medicinal aspects."
+      },
+      {
+        "question": "What is the no-biopsy approach for celiac disease?",
+        "expected_answer": "conditional no-biopsy approach for selected adults with high-titre IgA anti-TG2 serology (≥10×ULN)",
+        "source_pmid": "40999951",
+        "source_title": "European Society for the Study of Coeliac Disease 2025 Updated Guidelines..."
+      },
+      {
+        "question": "How many duodenal biopsies are recommended?",
+        "expected_answer": "at least four samples from the second part of the duodenum, with bulb biopsies conditionally included",
+        "source_pmid": "40999951",
+        "source_title": "European Society for the Study of Coeliac Disease 2025 Updated Guidelines..."
+      },
+      {
+        "question": "What is the treatment for celiac disease?",
+        "expected_answer": "primarily a gluten-free diet (GFD)",
+        "source_pmid": "31210940",
+        "source_title": "European Society for the Study of Coeliac Disease (ESsCD) guideline for coeliac disease and other gluten-related disorders."
+      }
+    ]
+  },
+  "metadata": {
+    "created_date": "2026-04-18",
+    "source": "pubmed_corpus_final.json",
+    "total_questions": 24,
+    "terms_covered": [
+      "atrial_fibrillation",
+      "type_2_diabetes_mellitus",
+      "acute_otitis_media",
+      "celiac_disease_diagnosis"
+    ]
+  }
+}
