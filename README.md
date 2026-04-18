@@ -417,23 +417,23 @@ The benchmark is needed "by end of week" (Friday). Today is Monday. I have 4 day
 
 **Step 3 — Execute in parallel, not sequentially**
 
-Instead of picking ONE option, I run multiple in parallel:
-
 | Day | Action |
 |-----|--------|
-| **Monday (today)** | Start Groq API benchmark (takes 2-3 hours). Simultaneously, request spot instances on RunPod/Lambda. |
-| **Tuesday** | If spot instance available, run the same benchmark there for latency numbers. |
-| **Wednesday** | Compare results. If they match on accuracy (they should), document API latency as "baseline" and spot latency as "self-hosted estimate." |
+| **Monday (today)** | Start Groq API benchmark (2–3 hours). Simultaneously request spot H100 instances on RunPod/Lambda Labs (~$2.50/hr, 60–70% cheaper than on-demand). |
+| **Tuesday** | If spot instance is available, run the same benchmark there for latency and throughput numbers. Preemption risk is acceptable for a short benchmark with checkpoint support. |
+| **Wednesday** | Compare results. If accuracy matches across both environments (expected), document API latency as "baseline reference" and spot latency as "self-hosted estimate." |
 | **Thursday** | Prepare report. |
 | **Friday** | Deliver results. |
 
-**Step 4 — Communicate, don't ask for permission**
+**Fallback:** If no spot GPU is available by Tuesday, run AWQ/GPTQ 4-bit quantized 
+Llama-3-70B on an **available A100 or A10G** (both have 24GB+ VRAM). Accuracy 
+degradation is typically 1–2% on medical QA tasks — clearly documented.
 
-I send my manager a brief message:
+**Step 4 — Communicate, don't ask for permission**
 
 > *"No L40S today. Running benchmark on Groq API for accuracy numbers (ready today). Also requesting spot H100 instances for latency validation (likely tomorrow). Will deliver full report by Friday. Let me know if you want me to prioritize something else."*
 
-This informs, doesn't block, and shows initiative.
+This informs without blocking, and demonstrates initiative. Note: any latency numbers from API runs will be flagged as non-representative of self-hosted inference in the final report.
 
 ---
 
