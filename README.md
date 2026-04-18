@@ -62,7 +62,9 @@ Hybrid RRF Retrieval
   └── e5-small     (semantic, Turkish strength)
       ↓
 Top-5 Articles → Context
+      ↓
 Gemini-3.1-flash-lite → Cited Answer (TR/EN)
+
 ```
 
 ### Model Selection: intfloat/multilingual-e5-small
@@ -85,11 +87,33 @@ Three embedding models were benchmarked on 5 queries (3 EN + 2 TR):
 
 ### What I'd Change With More Time
 
-- Fine-tune e5-small on TR→EN medical query pairs (no such dataset exists publicly)
-- Add query expansion: detect Turkish → translate to English before BM25
-- Cache PubMed results with TTL (currently fetched fresh each run)
-- Add cross-encoder reranking (ncbi/MedCPT-Cross-Encoder) as a third stage
-- Increase corpus to 500+ articles per term for meaningful BM25 parameter sensitivity
+1. **Hybrid Vector + Graph RAG for Medical Knowledge**  
+   Current system uses flat vector retrieval. Medical literature has rich relational structure (drug-disease interactions, contraindications, treatment hierarchies). Adding a knowledge graph layer (e.g., using Neo4j or LlamaIndex's GraphRAG) would enable multi-hop reasoning: "Find drugs that treat X but don't interact with Y."
+
+2. **Query Rewriting & Decomposition**  
+   Complex clinical queries often combine multiple sub-questions. Implement query rewriting (using a smaller LLM like Gemini Flash) to decompose "What are the latest guidelines for managing type 2 diabetes in elderly patients with CKD?" into sub-queries for each condition, then fuse results.
+
+3. **Adaptive Retrieval with Router**  
+   Not all queries need semantic search. Add a lightweight router (e.g., BERT-based classifier) to decide:
+   - Exact term match (BM25) → for drug names, procedure codes
+   - Semantic search → for conceptual questions
+   - Hybrid RRF → for mixed cases
+
+4. **Self-Reflection & Citation Verification**  
+   Add a verification step where the LLM checks if its generated answer is actually supported by the cited sources. If not, trigger re-retrieval or fallback to "information not found."
+
+5. **Streaming & Real-time Updates**  
+   PubMed releases new articles daily. Implement incremental indexing so the corpus updates without full rebuilds. Use a message queue (RabbitMQ/Kafka) to process new articles as they arrive.
+
+6. **Evaluation with Real Physicians**  
+   Current pseudo-relevance (query_terms field) is an approximation. A proper evaluation would involve 2-3 physicians scoring relevance and answer quality on 50-100 queries (Cohen's kappa for inter-rater reliability).
+
+7. **LangGraph for Multi-Step Reasoning**  
+   Complex medical queries may require multiple retrieval steps (e.g., "Find patients with X, then check Y, then recommend Z"). Implement a LangGraph agent with:
+   - Retriever node (fetch articles)
+   - Extractor node (pull key facts)
+   - Reasoner node (synthesize)
+   - Verifier node (check citations)
 
 ---
 
