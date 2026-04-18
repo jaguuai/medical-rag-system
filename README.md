@@ -7,7 +7,7 @@ A retrieval-augmented generation system for Turkish-speaking doctors querying En
 ## 1. Setup & Usage
 
 ```bash
-git clone https://github.com/your-username/doctorfollow-rag
+git clone https://github.com/jaguuai/medical-rag-system
 cd doctorfollow-rag
 pip install -r requirements.txt
 ```
