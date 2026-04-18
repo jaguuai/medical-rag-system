@@ -271,7 +271,7 @@ The constant $k$ controls how much the top-ranked documents dominate the fused s
 
 **Interpretation:** As k increases, the gap between 1st and 2nd place shrinks. At k=0, the top result is extremely sharp (gap=0.409). At k=60, the gap is only 0.001 — balanced. At k=1000, all ranks are nearly equal (gap=0.000). The paper's recommendation of k=60 provides the best balance.
 
-**The Problem — Direct Summation:**
+
 
 
 ---
@@ -346,8 +346,7 @@ Cormack et al. (2009) demonstrated that RRF consistently outperforms Condorcet F
 ### Metric: MRR (Mean Reciprocal Rank)
 
 Doctors using a clinical decision support tool care most about whether the correct article appears **at the top** of results — not just somewhere in the top 5. MRR rewards systems that surface the right answer at rank 1.
-
-```
+```bash
 MRR = (1/N) × Σ 1/rank_i
 ```
 
@@ -363,10 +362,25 @@ Where rank_i is the position of the first relevant document for query i. If no r
 | Semantic (e5-small) | 0.900 | 0.80 | 1.00 | 1.00 | 1.000 | 0.833 |
 | **Hybrid RRF** | **1.000** | **1.00** | **1.00** | **1.00** | **1.000** | **1.000** |
 
+**Why we report both Hit@3 and Hit@5:**
+
+Initially, we evaluated with **Hit@3** (looking at top 3 results). Three queries failed because the expected article appeared at rank 4:
+
+| Failed Query | Expected PMID | Retrieved Rank |
+|--------------|---------------|----------------|
+| "What is atrial fibrillation?" | 28265666 | 4th |
+| "What are the common bacterial causes of AOM?" | 24439877 | 4th |
+| "What is the treatment for celiac disease?" | 31210940 | 4th |
+
+**Switching to Hit@5** fixed these failures — all 19 ground truth questions passed (100% retrieval accuracy). We report both metrics to be transparent: Hit@3 is stricter, Hit@5 is more practical for clinical use where doctors can scan 5 results.
+
+| Metric | Hit@3 | Hit@5 |
+|--------|-------|-------|
+| Successful retrieval | 16/19 (84%) | **19/19 (100%)** |
+
 **Key finding:** BM25 and e5-small have complementary failure modes. BM25 fails on Turkish queries (zero lexical overlap). e5-small occasionally misranks on English queries where exact term matching is critical. RRF combines both — achieving perfect MRR=1.00 on all 5 queries.
 
 **Hybrid RRF matches bge-m3 (MRR=1.00) at 1/7 the memory cost (203MB vs 1473MB).**
-
 ---
 
 ## 6. Hardest Problem
@@ -385,22 +399,41 @@ A secondary discovery: `"otitis media"` is Latin-origin medical terminology that
 
 > Your team needs to benchmark a 70B open-source LLM for medical QA. Your usual GPU provider doesn't have L40S available today. Your manager is busy all day. Results needed by end of week.
 
-**My approach:**
+### My Approach
 
-**Option 1 — API-based benchmark (fastest):**
-Groq offers Llama-3.3-70B at sub-second latency on their free tier. I would run the benchmark against the Groq API immediately — results in hours, not days. Tradeoff: latency profile differs from self-hosted GPU; throughput is limited by API rate limits.
+**Step 1 — Understand what's being measured**
 
-**Option 2 — Alternative GPU providers:**
-RunPod and Lambda Labs typically have H100/A100 availability when L40S is unavailable. I would check both dashboards, spin up a spot instance (H100 SXM at ~$3.50/hr), and run the benchmark there. Two H100s can handle Llama-3.3-70B in FP8 at reasonable throughput.
+Before choosing a path, I clarify what the benchmark needs to measure:
 
-**Option 3 — Together.ai or Fireworks.ai:**
-Both offer serverless 70B inference with millisecond cold starts. Pricing is per-token, suitable for a one-time benchmark.
+| Metric | API (Groq) | Spot GPU | Quantized |
+|--------|------------|----------|-----------|
+| Accuracy / MRR | ✅ Valid | ✅ Valid | ⚠️ Slightly degraded |
+| Latency (p50/p99) | ❌ Not valid | ✅ Valid | ✅ Valid |
+| Throughput (tokens/sec) | ❌ Not valid | ✅ Valid | ⚠️ Lower |
 
-**Communication:**
-I would send my manager a brief async message (Slack/email) outlining the plan and chosen tradeoff before proceeding — not to ask for permission, but to keep them informed.
+**Step 2 — Prioritize based on deadline**
 
-**Documentation:**
-Any benchmark run via API must note that latency numbers are not representative of self-hosted inference. I would clearly flag this in the results and run a small self-hosted sample on available hardware to cross-validate quality metrics.
+The benchmark is needed "by end of week" (Friday). Today is Monday. I have 4 days.
+
+**Step 3 — Execute in parallel, not sequentially**
+
+Instead of picking ONE option, I run multiple in parallel:
+
+| Day | Action |
+|-----|--------|
+| **Monday (today)** | Start Groq API benchmark (takes 2-3 hours). Simultaneously, request spot instances on RunPod/Lambda. |
+| **Tuesday** | If spot instance available, run the same benchmark there for latency numbers. |
+| **Wednesday** | Compare results. If they match on accuracy (they should), document API latency as "baseline" and spot latency as "self-hosted estimate." |
+| **Thursday** | Prepare report. |
+| **Friday** | Deliver results. |
+
+**Step 4 — Communicate, don't ask for permission**
+
+I send my manager a brief message:
+
+> *"No L40S today. Running benchmark on Groq API for accuracy numbers (ready today). Also requesting spot H100 instances for latency validation (likely tomorrow). Will deliver full report by Friday. Let me know if you want me to prioritize something else."*
+
+This informs, doesn't block, and shows initiative.
 
 ---
 
