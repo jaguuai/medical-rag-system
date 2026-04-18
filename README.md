@@ -116,48 +116,118 @@ Three embedding models were benchmarked on 5 queries (3 EN + 2 TR):
    - Verifier node (check citations)
 
 ---
+## 3. BM25 Analysis — k1 and b Parameters
 
-## 3. BM25 Analysis — k1 and b
+### What k1 Controls (Term Frequency Saturation)
 
-### What k1 controls (term frequency saturation)
+k1 determines how much repeated occurrences of a query term increase the document score.
 
-k1 determines how much repeated occurrences of a query term increase the score.
+**Intuition:** Does seeing "diabetes" 10 times in an abstract make it 10x more relevant than seeing it once? k1 answers this.
 
-| k1 | Behavior | Use case |
-|----|----------|----------|
-| 0.5 | TF saturates fast, near-binary scoring | Short documents |
-| **1.2–1.5** | Moderate saturation | **Medical abstracts ← chosen** |
-| 2.0+ | High TF still adds significant score | Long documents, books |
+| k1 Value | Behavior | Use Case |
+|----------|----------|----------|
+| 0.5 | TF saturates very fast (near-binary: presence/absence) | Short documents, titles |
+| **1.2–1.5** | **Moderate saturation** | **Medical abstracts — chosen** |
+| 2.0+ | High TF still adds significant score | Long documents, books, patents |
 
-In our corpus, `"diabetes"` appears an average of **4.0x per abstract** (max 19x). k1=1.5 prevents over-rewarding high-frequency repetition while still respecting meaningful term signals. k1>2.0 was empirically observed to drop Hit@5 from 4/5 to 3/5.
+### What b Controls (Document Length Normalization)
 
-> **Source:** Robertson & Zaragoza (2009), *"The Probabilistic Relevance Framework: BM25 and Beyond."* Thayyaba Khatoon et al. (2019) further validated k1∈[1.2–1.5] for biomedical literature retrieval.
+b normalizes scores by document length relative to corpus average.
 
-### What b controls (document length normalization)
+**Intuition:** Should a 400-word abstract with 8 mentions of "diabetes" score the same as a 100-word abstract with 2 mentions (same density)?
 
-| b | Behavior |
-|---|----------|
-| 0.0 | No normalization — long docs dominate |
-| **0.75** | Balanced — **literature standard, chosen** |
-| 1.0 | Full normalization — length fully penalized |
+| b Value | Behavior | Use Case |
+|---------|----------|----------|
+| 0.0 | No normalization — long documents dominate | All documents same length |
+| **0.75** | **Balanced — literature standard** | **General purpose, chosen** |
+| 1.0 | Full normalization — length fully penalized | Highly variable lengths |
 
-Our corpus has CV=0.54 (std/mean), spanning 36–426 words — heterogeneous. b=0.75 applies moderate normalization appropriate for this variance.
+---
+
+### Empirical Test: Same Topic, Heterogeneous Lengths
+
+We tested both parameters on **gestational diabetes** — the most heterogeneous topic in our corpus (article lengths: 68, 86, 111, 154, 417 words).
+
+**Test 1: k1 varies (b=0.75 fixed)**
+
+| k1 | Short (68w) | 2nd | 3rd | 4th | Long (417w) | Winner |
+|----|-------------|-----|-----|-----|-------------|--------|
+| 0.5 | 0.5502 | 0.5294 | 0.4817 | 0.5304 | 0.5782 | **417 words** |
+| 1.5 | 0.7612 | 0.6924 | 0.5685 | 0.6954 | 0.8644 | **417 words** |
+| 2.5 | 0.9120 | 0.7977 | 0.6194 | 0.8024 | 1.0973 | **417 words** |
+
+**Finding:** k1 does **NOT** change which document wins. Only score magnitude changes (0.58 → 1.10). When all documents contain the query term, k1 is irrelevant for ranking.
+
+**Test 2: b varies (k1=1.5 fixed)**
+
+| b | Short (68w) | 2nd | 3rd | 4th | Long (417w) | Winner |
+|----|-------------|-----|-----|-----|-------------|--------|
+| 0.0 | 0.6330 | 0.5843 | 0.4967 | 0.6817 | 0.9413 | **417 words** |
+| 0.5 | 0.7130 | 0.6522 | 0.5423 | 0.6908 | 0.8886 | **417 words** |
+| 0.75 | 0.7612 | 0.6924 | 0.5685 | 0.6954 | 0.8644 | **417 words** |
+| 1.0 | 0.8166 | 0.7379 | 0.5975 | 0.7001 | 0.8415 | **417 words** |
+
+**Finding:** b also did **NOT** change the winner. The longest document's term frequency advantage is so large that even maximum length normalization (b=1.0) cannot offset it.
+
+**Test 3: Grid Search (25 combinations)**
+
+| k1\b | 0.0 | 0.3 | 0.5 | 0.75 | 1.0 |
+|------|-----|-----|-----|------|-----|
+| 0.5 | 417 | 417 | 417 | 417 | 417 |
+| 1.0 | 417 | 417 | 417 | 417 | 417 |
+| 1.5 | 417 | 417 | 417 | 417 | 417 |
+| 2.0 | 417 | 417 | 417 | 417 | 417 |
+| 2.5 | 417 | 417 | 417 | 417 | 417 |
+
+**All 25 combinations produced the same winner** — the 417-word document ranked highest in every case.
+
+---
+
+### Our Corpus Length Distribution
+
+| Metric | Value |
+|--------|-------|
+| Min | 36 words |
+| Max | 426 words |
+| Mean | 166 words |
+| CV (std/mean) | **0.54** (heterogeneous) |
+
+The corpus is heterogeneous — lengths vary significantly. b=0.75 applies appropriate moderate normalization.
+
+---
 
 ### Grid Search Result
 
 A 25-combination grid search (k1 ∈ [0.5, 2.5] × b ∈ [0.0, 1.0]) yielded identical MRR=0.950 across all combinations on our 50-article corpus. This is expected — when a corpus is constructed by fetching articles per search term, lexical overlap between queries and documents is too high for parameter differences to manifest. Parameter sensitivity requires a larger, noisier corpus (100k+ articles).
 
-**Decision: k1=1.5, b=0.75** — literature standard (Robertson & Zaragoza 2009), empirically tied on this corpus.
+---
 
 ### Critical BM25 Limitation: Turkish Queries
 
-BM25 is purely lexical. For `"Çölyak hastalığı tanı kriterleri nelerdir?"`, BM25 scores **ALL 50 documents 0.000** — `"çölyak"` does not appear anywhere in the English corpus. k1 and b are irrelevant when lexical overlap is zero. This is the core motivation for Hybrid RRF.
+BM25 is **purely lexical** — it only matches exact words. For Turkish queries, this is catastrophic.
 
-| Query | BM25 | Reason |
-|-------|------|--------|
-| Type 2 diabetes guidelines (EN) | ✅ MRR=1.0 | Full lexical match |
-| Çocuklarda akut otitis media (TR) | ✅ MRR=1.0 | Lucky — "otitis media" is Latin, same in both |
-| Çölyak hastalığı (TR) | ❌ MRR=0.0 | Zero lexical overlap with English corpus |
+| Query | BM25 Result | Reason |
+|-------|-------------|--------|
+| "Type 2 diabetes guidelines" (EN) | ✅ MRR=1.0 | Full lexical match |
+| "Çocuklarda akut otitis media" (TR) | ✅ MRR=1.0 | **Lucky** — "otitis media" is Latin, same in both |
+| "Çölyak hastalığı" (TR) | ❌ **MRR=0.0** | **Zero lexical overlap** — "çölyak" not in English corpus |
+
+**Test result:** For `"Çölyak hastalığı tanı kriterleri nelerdir?"`, BM25 scored **ALL 50 documents 0.000**. k1 and b are completely irrelevant when lexical overlap is zero.
+
+This is the core motivation for **Hybrid RRF** — combining BM25 (lexical, English) with e5-small (semantic, multilingual).
+
+---
+
+### Final Decision
+
+| Parameter | Value | Justification |
+|-----------|-------|---------------|
+| **k1** | **1.5** | Literature standard for medical abstracts. Empirical test showed no ranking difference across k1 values. |
+| **b** | **0.75** | Literature standard. Balanced normalization for heterogeneous corpus (CV=0.54). |
+
+**Why not empirical best?** Grid search gave identical results for all 25 combinations. With no empirical difference, we follow Robertson & Zaragoza (2009) — the widely accepted defaults for scientific/medical text.
+
+> **Source:** Robertson & Zaragoza (2009), *"The Probabilistic Relevance Framework: BM25 and Beyond."* Thayyaba Khatoon et al. (2019) further validated k1∈[1.2–1.5] for biomedical literature retrieval.
 
 ---
 
