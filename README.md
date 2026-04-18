@@ -429,7 +429,7 @@ The benchmark is needed "by end of week" (Friday). Today is Monday. I have 4 day
 Llama-3-70B on an **available A100 or A10G** (both have 24GB+ VRAM). Accuracy 
 degradation is typically 1–2% on medical QA tasks — clearly documented.
 
-**Step 4 — Communicate, don't ask for permission**
+**Step 4 — Communicate**
 
 > *"No L40S today. Running benchmark on Groq API for accuracy numbers (ready today). Also requesting spot H100 instances for latency validation (likely tomorrow). Will deliver full report by Friday. Let me know if you want me to prioritize something else."*
 
