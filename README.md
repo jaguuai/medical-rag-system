@@ -453,6 +453,4 @@ The initial pipeline returned articles without abstracts (5/50 missing). Built `
 
 ---
 
-## AI Tool Usage
 
-This project was built with Claude (Anthropic) as a coding assistant, used for: debugging XML parsing errors, structuring the evaluation framework, and drafting README sections. All architectural decisions, model selections, and experimental results are original. Per assessment rules, AI tool usage is disclosed here.
