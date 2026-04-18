@@ -23,17 +23,29 @@ Or in Colab, use the Secrets panel and add `GEMINI_API_KEY`.
 
 **Requirements:**
 ```
-requests==2.32.4
-pandas==2.2.2
-tqdm==4.67.3
-tenacity==9.1.4
-rank-bm25==0.2.2
-sentence-transformers==5.4.0
-transformers==5.0.0
-torch==2.10.0
-numpy==2.0.2
-google-generativeai
-psutil
+# Core
+requests>=2.32.0
+pandas>=2.2.0
+numpy>=1.26.0
+tqdm>=4.66.0
+tenacity>=9.0.0
+
+# Retrieval
+rank-bm25>=0.2.2
+sentence-transformers>=2.2.0
+transformers>=4.41.0
+torch>=2.0.0
+
+# Visualization
+matplotlib>=3.7.0
+seaborn>=0.12.0
+
+# LLM
+google-genai>=0.3.0
+
+# Utils
+huggingface-hub>=0.23.0
+psutil>=5.9.0
 ```
 
 ---
@@ -50,8 +62,7 @@ Hybrid RRF Retrieval
   └── e5-small     (semantic, Turkish strength)
       ↓
 Top-5 Articles → Context
-      ↓
-Gemini 2.0 Flash → Cited Answer (TR/EN)
+Gemini-3.1-flash-lite → Cited Answer (TR/EN)
 ```
 
 ### Model Selection: intfloat/multilingual-e5-small
